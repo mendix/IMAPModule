@@ -171,7 +171,7 @@ public class EmailHandler
 
 		if(!this.account.getUseBatchImport() && folder.getMessageCount() > this.account.getBatchSize())
 		{
-			amountEmails = this.account.getBatchSize() -1;
+			amountEmails = this.account.getBatchSize();
 		}
 		
 		List<IMendixObject> outputList = new ArrayList<IMendixObject>();
@@ -208,7 +208,7 @@ public class EmailHandler
 				folder.fetch(messages, profile);
 			}
 			
-			for (int i = 0; i <= nrToFetch; i++)
+			for (int i = 0; i < nrToFetch; i++)
 			{
 				amountEmails--;
 				
