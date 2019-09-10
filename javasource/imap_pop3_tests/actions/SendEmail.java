@@ -10,61 +10,64 @@
 package imap_pop3_tests.actions;
 
 import com.mendix.core.Core;
-import com.mendix.logging.ILogNode;
 import com.mendix.systemwideinterfaces.core.IContext;
 import com.mendix.webui.CustomJavaAction;
-import com.mendix.systemwideinterfaces.core.IMendixObject;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import javax.mail.*;
 import javax.mail.internet.*;
-import javax.activation.*;
 
 public class SendEmail extends CustomJavaAction<java.lang.Boolean>
 {
-	private java.lang.String to;
-	private java.lang.String from;
 	private java.lang.String host;
 	private java.lang.Long port;
 	private java.lang.String subject;
 	private java.lang.String message;
-	private IMendixObject __attachment;
-	private system.proxies.FileDocument attachment;
+	private java.lang.String attachment;
+	private java.lang.String attachmentContentId;
 	private imap_pop3_tests.proxies.ContentType contentType;
 	private imap_pop3_tests.proxies.CharacterSet charSet;
+	private java.lang.String attachmentContentDisposition;
 
-	public SendEmail(IContext context, java.lang.String to, java.lang.String from, java.lang.String host, java.lang.Long port, java.lang.String subject, java.lang.String message, IMendixObject attachment, java.lang.String contentType, java.lang.String charSet)
+	public SendEmail(IContext context, java.lang.String host, java.lang.Long port, java.lang.String subject, java.lang.String message, java.lang.String attachment, java.lang.String attachmentContentId, java.lang.String contentType, java.lang.String charSet, java.lang.String attachmentContentDisposition)
 	{
 		super(context);
-		this.to = to;
-		this.from = from;
 		this.host = host;
 		this.port = port;
 		this.subject = subject;
 		this.message = message;
-		this.__attachment = attachment;
+		this.attachment = attachment;
+		this.attachmentContentId = attachmentContentId;
 		this.contentType = contentType == null ? null : imap_pop3_tests.proxies.ContentType.valueOf(contentType);
 		this.charSet = charSet == null ? null : imap_pop3_tests.proxies.CharacterSet.valueOf(charSet);
+		this.attachmentContentDisposition = attachmentContentDisposition;
 	}
 
 	@Override
 	public java.lang.Boolean executeAction() throws Exception
 	{
-		this.attachment = __attachment == null ? null : system.proxies.FileDocument.initialize(getContext(), __attachment);
-
 		// BEGIN USER CODE
 		Properties properties = new Properties();
 	    properties.setProperty("mail.smtp.host", host);
 	    properties.setProperty("mail.smtp.port", port.toString());
 	    Session session = Session.getDefaultInstance(properties);
         MimeMessage mimeMessage = new MimeMessage(session);
-        mimeMessage.setFrom(new InternetAddress(from));
-        mimeMessage.addRecipient(Message.RecipientType.TO, new InternetAddress(to));
+        mimeMessage.setFrom(new InternetAddress("alice@" + host));
+        mimeMessage.addRecipient(Message.RecipientType.TO, new InternetAddress("bob@" + host));
+        mimeMessage.addRecipient(Message.RecipientType.TO, new InternetAddress("charlie@" + host));
+        mimeMessage.addRecipient(Message.RecipientType.CC, new InternetAddress("dave@" + host));
+        mimeMessage.addRecipient(Message.RecipientType.BCC, new InternetAddress("erin@" + host));       
         mimeMessage.setSubject(subject);
-        mimeMessage.setText(message);
+        setContentType(mimeMessage);        
+        if (attachment == null)
+        	mimeMessage.setText(message);
+        else
+        	setMultipart(mimeMessage);
         
-        // todo: attachment, contentType, charSet
-        
-        Transport.send(mimeMessage);
+    	Transport.send(mimeMessage);
         
         return true;
 		// END USER CODE
@@ -80,5 +83,61 @@ public class SendEmail extends CustomJavaAction<java.lang.Boolean>
 	}
 
 	// BEGIN EXTRA CODE
+	private void setContentType(MimeMessage mimeMessage) throws Exception
+	{
+		String contentTypeString;
+        
+        if (attachment == null)
+        	contentTypeString = getContentTypeString();
+        else
+        	contentTypeString = "multipart/mixed";
+        
+        mimeMessage.setHeader("Content-Type", contentTypeString);		
+	}
+
+	private String getContentTypeString()
+	{
+		switch (contentType) {
+			case Html:
+				return "text/html";
+			case Plaintext:
+			default:
+				return "text/plain";
+		}
+	}
+	
+	private String getCharSetString()
+	{
+		switch (charSet) {
+			case ISO_8859_1:
+				return "ISO-8859-1";
+			case UTF_8:
+			default:
+				return "UTF-8";
+		}
+	}
+	
+	private void setMultipart(MimeMessage mimeMessage) throws Exception
+	{
+		MimeMultipart multipart = new MimeMultipart("alternative");
+		
+		MimeBodyPart contentPart = new MimeBodyPart();
+		contentPart.setHeader("Content-Type", getContentTypeString() + "; charset=" + getCharSetString());
+		contentPart.setContent(message, getContentTypeString());
+		multipart.addBodyPart(contentPart);
+
+		InternetHeaders attachmentHeaders = new InternetHeaders();
+		if (attachmentContentId != null)
+			attachmentHeaders.setHeader("Content-ID", attachmentContentId);
+		if (attachmentContentDisposition != null)
+			attachmentHeaders.setHeader("Content-Disposition", attachmentContentDisposition);
+		Path path = Paths.get(Core.getConfiguration().getResourcesPath() + File.separator + attachment);
+		byte[] data = Files.readAllBytes(path);
+		MimeBodyPart attachmentPart = new MimeBodyPart(attachmentHeaders, data);
+		multipart.addBodyPart(attachmentPart);
+
+		mimeMessage.setContent(multipart);
+	}
+	
 	// END EXTRA CODE
 }

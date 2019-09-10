@@ -33,15 +33,27 @@ public class Microflows
 			throw new MendixRuntimeException(e);
 		}
 	}
-	public static java.lang.String retrieve_Assert(IContext context, imap_pop3_email.proxies.EmailAccount _emailAccount, java.lang.String _expectedTo, java.lang.String _expectedFrom)
+	public static java.lang.String retrieve_Assert(IContext context, imap_pop3_email.proxies.EmailAccount _emailAccount)
 	{
 		try
 		{
 			Map<java.lang.String, Object> params = new HashMap<java.lang.String, Object>();
 			params.put("emailAccount", _emailAccount == null ? null : _emailAccount.getMendixObject());
-			params.put("expectedTo", _expectedTo);
-			params.put("expectedFrom", _expectedFrom);
 			return (java.lang.String)Core.execute(context, "IMAP_POP3_Tests.Retrieve_Assert", params);
+		}
+		catch (CoreException e)
+		{
+			throw new MendixRuntimeException(e);
+		}
+	}
+	public static java.lang.String retrieve_Per_Protocol(IContext context, imap_pop3_email.proxies.Protocol _protocol, imap_pop3_tests.proxies.CharacterSet _characterSet)
+	{
+		try
+		{
+			Map<java.lang.String, Object> params = new HashMap<java.lang.String, Object>();
+			params.put("protocol", _protocol == null ? null : _protocol.name());
+			params.put("characterSet", _characterSet == null ? null : _characterSet.name());
+			return (java.lang.String)Core.execute(context, "IMAP_POP3_Tests.Retrieve_Per_Protocol", params);
 		}
 		catch (CoreException e)
 		{
@@ -60,6 +72,18 @@ public class Microflows
 			throw new MendixRuntimeException(e);
 		}
 	}
+	public static java.lang.String test_Multipart(IContext context)
+	{
+		try
+		{
+			Map<java.lang.String, Object> params = new HashMap<java.lang.String, Object>();
+			return (java.lang.String)Core.execute(context, "IMAP_POP3_Tests.Test_Multipart", params);
+		}
+		catch (CoreException e)
+		{
+			throw new MendixRuntimeException(e);
+		}
+	}
 	public static java.lang.String test_Retrieve_IMAP(IContext context)
 	{
 		try
@@ -72,12 +96,48 @@ public class Microflows
 			throw new MendixRuntimeException(e);
 		}
 	}
+	public static java.lang.String test_Retrieve_IMAPS(IContext context)
+	{
+		try
+		{
+			Map<java.lang.String, Object> params = new HashMap<java.lang.String, Object>();
+			return (java.lang.String)Core.execute(context, "IMAP_POP3_Tests.Test_Retrieve_IMAPS", params);
+		}
+		catch (CoreException e)
+		{
+			throw new MendixRuntimeException(e);
+		}
+	}
 	public static java.lang.String test_Retrieve_POP3(IContext context)
 	{
 		try
 		{
 			Map<java.lang.String, Object> params = new HashMap<java.lang.String, Object>();
 			return (java.lang.String)Core.execute(context, "IMAP_POP3_Tests.Test_Retrieve_POP3", params);
+		}
+		catch (CoreException e)
+		{
+			throw new MendixRuntimeException(e);
+		}
+	}
+	public static java.lang.String test_Retrieve_POP3S(IContext context)
+	{
+		try
+		{
+			Map<java.lang.String, Object> params = new HashMap<java.lang.String, Object>();
+			return (java.lang.String)Core.execute(context, "IMAP_POP3_Tests.Test_Retrieve_POP3S", params);
+		}
+		catch (CoreException e)
+		{
+			throw new MendixRuntimeException(e);
+		}
+	}
+	public static java.lang.String test_Retrieve_Without_Delete(IContext context)
+	{
+		try
+		{
+			Map<java.lang.String, Object> params = new HashMap<java.lang.String, Object>();
+			return (java.lang.String)Core.execute(context, "IMAP_POP3_Tests.Test_Retrieve_Without_Delete", params);
 		}
 		catch (CoreException e)
 		{

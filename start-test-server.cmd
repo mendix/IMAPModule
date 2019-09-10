@@ -1,0 +1,1 @@
+java -Dgreenmail.setup.all -Dgreenmail.users=bob:bob@mail.local -jar userlib/greenmail-standalone-1.5.10.jar
