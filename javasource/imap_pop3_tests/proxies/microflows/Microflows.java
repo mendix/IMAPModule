@@ -15,7 +15,7 @@ import com.mendix.systemwideinterfaces.core.IMendixObject;
 public class Microflows
 {
 	// These are the microflows for the IMAP_POP3_Tests module
-	public static imap_pop3_email.proxies.EmailAccount create_Account(IContext context, imap_pop3_email.proxies.Protocol _protocol, boolean _useInlineImages, imap_pop3_email.proxies.MessageHandling _messageHandling, java.lang.Long _batchSize, java.lang.String _folder)
+	public static imap_pop3_email.proxies.EmailAccount create_Account(IContext context, imap_pop3_email.proxies.Protocol _protocol, boolean _useInlineImages, imap_pop3_email.proxies.MessageHandling _messageHandling, java.lang.Long _batchSize)
 	{
 		try
 		{
@@ -24,7 +24,6 @@ public class Microflows
 			params.put("UseInlineImages", _useInlineImages);
 			params.put("MessageHandling", _messageHandling == null ? null : _messageHandling.name());
 			params.put("BatchSize", _batchSize);
-			params.put("folder", _folder);
 			IMendixObject result = (IMendixObject)Core.execute(context, "IMAP_POP3_Tests.Create_Account", params);
 			return result == null ? null : imap_pop3_email.proxies.EmailAccount.initialize(context, result);
 		}
