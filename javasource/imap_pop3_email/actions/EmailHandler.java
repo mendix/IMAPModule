@@ -7,6 +7,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.Scanner;
 
 import javax.mail.Address;
 import javax.mail.BodyPart;
@@ -21,8 +22,6 @@ import javax.mail.Session;
 import javax.mail.Store;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeUtility;
-
-import org.apache.commons.io.IOUtils;
 
 import com.mendix.core.Core;
 import com.mendix.core.CoreException;
@@ -454,8 +453,7 @@ public class EmailHandler
 	}
 
 	/**
-	 * Parse the email content to string to save to the Mendix object. The
-	 * Apache IOUtils is used to save the content from an InputStream to String.
+	 * Parse the email content to string to save to the Mendix object. It convert the content from an InputStream to String.
 	 * @param message The Mendix object to save the email content
 	 * @param content Object of the content, can be an InputStream or String
 	 * @throws IOException
@@ -463,14 +461,20 @@ public class EmailHandler
 	private static void setEmailContent(EmailMessage message, Object content, String contentType) throws IOException
 	{
 		if (content instanceof InputStream)
-		{			
-			message.setContent(IOUtils.toString((InputStream) content, getCharSet(contentType)));
+		{
+			message.setContent(mkString((InputStream) content, getCharSet(contentType)));
 		} else if (content instanceof String)
 		{
 			message.setContent((String) content);
 		} else
 		{
 			log.warn("Retrieved content from an email, but is wasn't possible to determine what type of content it was: " + content.toString() + " with contenttype: " + contentType);
+		}
+	}
+
+	private static String mkString(InputStream inputStream, String charset) {
+		try (Scanner scanner = new Scanner(inputStream, charset)) {
+			return scanner.useDelimiter("\\A").next();
 		}
 	}
 	

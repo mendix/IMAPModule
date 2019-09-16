@@ -12,11 +12,12 @@ public class UserActionsRegistrar
   public void registerActions(IActionRegistrator registrator)
   {
     registrator.bundleComponentLoaded();
-    registrator.registerUserAction(appcloudservices.actions.GenerateRandomPassword.class);
-    registrator.registerUserAction(appcloudservices.actions.LogOutUser.class);
-    registrator.registerUserAction(appcloudservices.actions.StartSignOnServlet.class);
     registrator.registerUserAction(encryption.actions.DecryptString.class);
     registrator.registerUserAction(encryption.actions.EncryptString.class);
+    registrator.registerUserAction(encryption.actions.GeneratePGPKeyRing.class);
+    registrator.registerUserAction(encryption.actions.PGPDecryptDocument.class);
+    registrator.registerUserAction(encryption.actions.PGPEncryptDocument.class);
+    registrator.registerUserAction(encryption.actions.ValidatePrivateKeyRing.class);
     registrator.registerUserAction(imap_pop3_email.actions.ConnectEmailServer.class);
     registrator.registerUserAction(imap_pop3_email.actions.GetFolders.class);
     registrator.registerUserAction(imap_pop3_email.actions.RetrieveEmailMessages.class);

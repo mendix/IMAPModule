@@ -17,7 +17,6 @@ public class Account extends system.proxies.User
 	public enum MemberNames
 	{
 		FullName("FullName"),
-		IsLocalUser("IsLocalUser"),
 		Name("Name"),
 		Password("Password"),
 		LastLogin("LastLogin"),
@@ -122,42 +121,6 @@ public class Account extends system.proxies.User
 	public final void setFullName(com.mendix.systemwideinterfaces.core.IContext context, java.lang.String fullname)
 	{
 		getMendixObject().setValue(context, MemberNames.FullName.toString(), fullname);
-	}
-
-	/**
-	 * @return value of IsLocalUser
-	 */
-	public final java.lang.Boolean getIsLocalUser()
-	{
-		return getIsLocalUser(getContext());
-	}
-
-	/**
-	 * @param context
-	 * @return value of IsLocalUser
-	 */
-	public final java.lang.Boolean getIsLocalUser(com.mendix.systemwideinterfaces.core.IContext context)
-	{
-		return (java.lang.Boolean) getMendixObject().getValue(context, MemberNames.IsLocalUser.toString());
-	}
-
-	/**
-	 * Set value of IsLocalUser
-	 * @param islocaluser
-	 */
-	public final void setIsLocalUser(java.lang.Boolean islocaluser)
-	{
-		setIsLocalUser(getContext(), islocaluser);
-	}
-
-	/**
-	 * Set value of IsLocalUser
-	 * @param context
-	 * @param islocaluser
-	 */
-	public final void setIsLocalUser(com.mendix.systemwideinterfaces.core.IContext context, java.lang.Boolean islocaluser)
-	{
-		getMendixObject().setValue(context, MemberNames.IsLocalUser.toString(), islocaluser);
 	}
 
 	@Override

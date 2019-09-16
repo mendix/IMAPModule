@@ -1,6 +1,9 @@
-/*.mpr.bak
-/*.mpr.lock
 /deployment
-/*.launch
-/.classpath
-/.project
+.classpath
+.project
+*.launch
+[Tt]humbs.db
+*.bak
+*.iml
+.idea
+*.lock
