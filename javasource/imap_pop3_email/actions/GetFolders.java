@@ -26,7 +26,7 @@ public class GetFolders extends CustomJavaAction<java.util.List<IMendixObject>>
 		this.__EmailConfiguration = EmailConfiguration;
 	}
 
-	@Override
+	@java.lang.Override
 	public java.util.List<IMendixObject> executeAction() throws Exception
 	{
 		this.EmailConfiguration = __EmailConfiguration == null ? null : imap_pop3_email.proxies.EmailAccount.initialize(getContext(), __EmailConfiguration);
@@ -52,7 +52,7 @@ public class GetFolders extends CustomJavaAction<java.util.List<IMendixObject>>
 	/**
 	 * Returns a string representation of this action
 	 */
-	@Override
+	@java.lang.Override
 	public java.lang.String toString()
 	{
 		return "GetFolders";

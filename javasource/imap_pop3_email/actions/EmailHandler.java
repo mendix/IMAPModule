@@ -431,7 +431,7 @@ public class EmailHandler
 				// The content is an attachment
 				Attachment attach = new Attachment(this.context);
 				attach.setAttachment_EmailMessage(mxMessage);
-				attach.setSize(bodyPart.getSize());
+				attach.setSize(Long.valueOf(bodyPart.getSize()));
 				attach.setName(bodyPart.getFileName());				
 				Core.storeFileDocumentContent(this.context, attach.getMendixObject(), bodyPart.getInputStream());
 				
