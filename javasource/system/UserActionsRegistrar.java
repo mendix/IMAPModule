@@ -14,6 +14,10 @@ public class UserActionsRegistrar
     registrator.bundleComponentLoaded();
     registrator.registerUserAction(encryption.actions.DecryptString.class);
     registrator.registerUserAction(encryption.actions.EncryptString.class);
+    registrator.registerUserAction(encryption.actions.GeneratePGPKeyRing.class);
+    registrator.registerUserAction(encryption.actions.PGPDecryptDocument.class);
+    registrator.registerUserAction(encryption.actions.PGPEncryptDocument.class);
+    registrator.registerUserAction(encryption.actions.ValidatePrivateKeyRing.class);
     registrator.registerUserAction(imap_pop3_email.actions.ConnectEmailServer.class);
     registrator.registerUserAction(imap_pop3_email.actions.GetFolders.class);
     registrator.registerUserAction(imap_pop3_email.actions.RetrieveEmailMessages.class);
