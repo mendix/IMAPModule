@@ -25,3 +25,6 @@ This module depends on the following modules:
 
 ## Configuration
 Basic setup and receive of emails can be done using the EmailAccount_Overview. To invoke receiving emails from an account you can call DS_ReceiveEmails.
+
+## Dependencies
+This version requires Encryption v1.4.1.
