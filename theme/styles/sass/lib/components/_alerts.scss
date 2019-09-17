@@ -3,36 +3,50 @@
 
    Default Bootstrap Alert boxes. Provide contextual feedback messages for typical user actions with the handful of available and flexible alert messages
 ========================================================================== */
+
 .alert {
-	border-radius: 4px;
-	margin-top: 0; // want to align it with padding of a page
-	padding: 15px;
-	border: 0;
+    margin-top: 0; // want to align it with padding of a page
+    padding: 15px;
+    border: 0;
+    border-radius: 4px;
 }
+
+//== Design Properties
+//## Helper classes to change the look and feel of the component
+//-------------------------------------------------------------------------------------------------------------------//
 .alert-bordered {
-	border: 1px solid;
+    border: 1px solid;
 }
-.alert-success { 
-	border-color: $color-alert-border-success;
-	background-color: $color-alert-bg-success; 
-	color: $color-alert-text-success;
+
+// Color variations 
+.alert-success {
+    color: $alert-success-color;
+    border-color: $alert-success-border-color;
+    background-color: $alert-success-bg;
 }
-.alert-info { 
-	border-color: $color-alert-border-info;
-	background-color: $color-alert-bg-info;	
-	color: $color-alert-text-info; 
+
+.alert-info {
+    color: $alert-info-color;
+    border-color: $alert-info-border-color;
+    background-color: $alert-info-bg;
 }
-.alert-warning { 
-	border-color: $color-alert-border-warning; 
-	background-color: $color-alert-bg-warning;
-	color: $color-alert-text-warning;
+
+.alert-warning {
+    color: $alert-warning-color;
+    border-color: $alert-warning-border-color;
+    background-color: $alert-warning-bg;
 }
-.alert-danger { 
-	border-color: $color-alert-border-danger;
-	background-color: $color-alert-bg-danger; 
-	color: $color-alert-text-danger;
+
+.alert-danger {
+    color: $alert-danger-color;
+    border-color: $alert-danger-border-color;
+    background-color: $alert-danger-bg;
 }
+
+//== State
+//## Styling when component is in certain state
+//-------------------------------------------------------------------------------------------------------------------//
 .has-error .alert {
-	margin-top: 8px;
-	margin-bottom: 0;
+    margin-top: 8px;
+    margin-bottom: 0;
 }
