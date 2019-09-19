@@ -17,6 +17,8 @@ public class Account extends system.proxies.User
 	public enum MemberNames
 	{
 		FullName("FullName"),
+		Email("Email"),
+		IsLocalUser("IsLocalUser"),
 		Name("Name"),
 		Password("Password"),
 		LastLogin("LastLogin"),
@@ -36,7 +38,7 @@ public class Account extends system.proxies.User
 			metaName = s;
 		}
 
-		@Override
+		@java.lang.Override
 		public java.lang.String toString()
 		{
 			return metaName;
@@ -58,7 +60,7 @@ public class Account extends system.proxies.User
 	/**
 	 * @deprecated Use 'Account.load(IContext, IMendixIdentifier)' instead.
 	 */
-	@Deprecated
+	@java.lang.Deprecated
 	public static administration.proxies.Account initialize(com.mendix.systemwideinterfaces.core.IContext context, com.mendix.systemwideinterfaces.core.IMendixIdentifier mendixIdentifier) throws com.mendix.core.CoreException
 	{
 		return administration.proxies.Account.load(context, mendixIdentifier);
@@ -123,7 +125,79 @@ public class Account extends system.proxies.User
 		getMendixObject().setValue(context, MemberNames.FullName.toString(), fullname);
 	}
 
-	@Override
+	/**
+	 * @return value of Email
+	 */
+	public final java.lang.String getEmail()
+	{
+		return getEmail(getContext());
+	}
+
+	/**
+	 * @param context
+	 * @return value of Email
+	 */
+	public final java.lang.String getEmail(com.mendix.systemwideinterfaces.core.IContext context)
+	{
+		return (java.lang.String) getMendixObject().getValue(context, MemberNames.Email.toString());
+	}
+
+	/**
+	 * Set value of Email
+	 * @param email
+	 */
+	public final void setEmail(java.lang.String email)
+	{
+		setEmail(getContext(), email);
+	}
+
+	/**
+	 * Set value of Email
+	 * @param context
+	 * @param email
+	 */
+	public final void setEmail(com.mendix.systemwideinterfaces.core.IContext context, java.lang.String email)
+	{
+		getMendixObject().setValue(context, MemberNames.Email.toString(), email);
+	}
+
+	/**
+	 * @return value of IsLocalUser
+	 */
+	public final java.lang.Boolean getIsLocalUser()
+	{
+		return getIsLocalUser(getContext());
+	}
+
+	/**
+	 * @param context
+	 * @return value of IsLocalUser
+	 */
+	public final java.lang.Boolean getIsLocalUser(com.mendix.systemwideinterfaces.core.IContext context)
+	{
+		return (java.lang.Boolean) getMendixObject().getValue(context, MemberNames.IsLocalUser.toString());
+	}
+
+	/**
+	 * Set value of IsLocalUser
+	 * @param islocaluser
+	 */
+	public final void setIsLocalUser(java.lang.Boolean islocaluser)
+	{
+		setIsLocalUser(getContext(), islocaluser);
+	}
+
+	/**
+	 * Set value of IsLocalUser
+	 * @param context
+	 * @param islocaluser
+	 */
+	public final void setIsLocalUser(com.mendix.systemwideinterfaces.core.IContext context, java.lang.Boolean islocaluser)
+	{
+		getMendixObject().setValue(context, MemberNames.IsLocalUser.toString(), islocaluser);
+	}
+
+	@java.lang.Override
 	public boolean equals(Object obj)
 	{
 		if (obj == this)
@@ -137,7 +211,7 @@ public class Account extends system.proxies.User
 		return false;
 	}
 
-	@Override
+	@java.lang.Override
 	public int hashCode()
 	{
 		return getMendixObject().hashCode();
@@ -155,8 +229,8 @@ public class Account extends system.proxies.User
 	 * @return String GUID from this object, format: ID_0000000000
 	 * @deprecated Use getMendixObject().getId().toLong() to get a unique identifier for this object.
 	 */
-	@Override
-	@Deprecated
+	@java.lang.Override
+	@java.lang.Deprecated
 	public java.lang.String getGUID()
 	{
 		return "ID_" + getMendixObject().getId().toLong();

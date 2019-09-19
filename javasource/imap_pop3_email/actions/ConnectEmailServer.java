@@ -24,7 +24,7 @@ public class ConnectEmailServer extends CustomJavaAction<java.lang.Boolean>
 		this.__Emailconfiguration = Emailconfiguration;
 	}
 
-	@Override
+	@java.lang.Override
 	public java.lang.Boolean executeAction() throws Exception
 	{
 		this.Emailconfiguration = __Emailconfiguration == null ? null : imap_pop3_email.proxies.EmailAccount.initialize(getContext(), __Emailconfiguration);
@@ -45,7 +45,7 @@ public class ConnectEmailServer extends CustomJavaAction<java.lang.Boolean>
 	/**
 	 * Returns a string representation of this action
 	 */
-	@Override
+	@java.lang.Override
 	public java.lang.String toString()
 	{
 		return "ConnectEmailServer";

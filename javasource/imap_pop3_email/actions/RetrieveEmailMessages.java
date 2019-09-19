@@ -31,7 +31,7 @@ public class RetrieveEmailMessages extends CustomJavaAction<java.util.List<IMend
 		this.__account = account;
 	}
 
-	@Override
+	@java.lang.Override
 	public java.util.List<IMendixObject> executeAction() throws Exception
 	{
 		this.account = __account == null ? null : imap_pop3_email.proxies.EmailAccount.initialize(getContext(), __account);
@@ -47,7 +47,7 @@ public class RetrieveEmailMessages extends CustomJavaAction<java.util.List<IMend
 	/**
 	 * Returns a string representation of this action
 	 */
-	@Override
+	@java.lang.Override
 	public java.lang.String toString()
 	{
 		return "RetrieveEmailMessages";

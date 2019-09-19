@@ -16,7 +16,6 @@ public class Attachment extends system.proxies.FileDocument
 	 */
 	public enum MemberNames
 	{
-		Size("Size"),
 		Position("Position"),
 		ContentID("ContentID"),
 		FileID("FileID"),
@@ -24,6 +23,7 @@ public class Attachment extends system.proxies.FileDocument
 		DeleteAfterDownload("DeleteAfterDownload"),
 		Contents("Contents"),
 		HasContents("HasContents"),
+		Size("Size"),
 		Attachment_EmailMessage("IMAP_POP3_email.Attachment_EmailMessage");
 
 		private java.lang.String metaName;
@@ -33,7 +33,7 @@ public class Attachment extends system.proxies.FileDocument
 			metaName = s;
 		}
 
-		@Override
+		@java.lang.Override
 		public java.lang.String toString()
 		{
 			return metaName;
@@ -55,7 +55,7 @@ public class Attachment extends system.proxies.FileDocument
 	/**
 	 * @deprecated Use 'Attachment.load(IContext, IMendixIdentifier)' instead.
 	 */
-	@Deprecated
+	@java.lang.Deprecated
 	public static imap_pop3_email.proxies.Attachment initialize(com.mendix.systemwideinterfaces.core.IContext context, com.mendix.systemwideinterfaces.core.IMendixIdentifier mendixIdentifier) throws com.mendix.core.CoreException
 	{
 		return imap_pop3_email.proxies.Attachment.load(context, mendixIdentifier);
@@ -82,42 +82,6 @@ public class Attachment extends system.proxies.FileDocument
 		for (com.mendix.systemwideinterfaces.core.IMendixObject obj : com.mendix.core.Core.retrieveXPathQuery(context, "//IMAP_POP3_email.Attachment" + xpathConstraint))
 			result.add(imap_pop3_email.proxies.Attachment.initialize(context, obj));
 		return result;
-	}
-
-	/**
-	 * @return value of Size
-	 */
-	public final java.lang.Integer getSize()
-	{
-		return getSize(getContext());
-	}
-
-	/**
-	 * @param context
-	 * @return value of Size
-	 */
-	public final java.lang.Integer getSize(com.mendix.systemwideinterfaces.core.IContext context)
-	{
-		return (java.lang.Integer) getMendixObject().getValue(context, MemberNames.Size.toString());
-	}
-
-	/**
-	 * Set value of Size
-	 * @param size
-	 */
-	public final void setSize(java.lang.Integer size)
-	{
-		setSize(getContext(), size);
-	}
-
-	/**
-	 * Set value of Size
-	 * @param context
-	 * @param size
-	 */
-	public final void setSize(com.mendix.systemwideinterfaces.core.IContext context, java.lang.Integer size)
-	{
-		getMendixObject().setValue(context, MemberNames.Size.toString(), size);
 	}
 
 	/**
@@ -243,7 +207,7 @@ public class Attachment extends system.proxies.FileDocument
 			getMendixObject().setValue(context, MemberNames.Attachment_EmailMessage.toString(), attachment_emailmessage.getMendixObject().getId());
 	}
 
-	@Override
+	@java.lang.Override
 	public boolean equals(Object obj)
 	{
 		if (obj == this)
@@ -257,7 +221,7 @@ public class Attachment extends system.proxies.FileDocument
 		return false;
 	}
 
-	@Override
+	@java.lang.Override
 	public int hashCode()
 	{
 		return getMendixObject().hashCode();
@@ -275,8 +239,8 @@ public class Attachment extends system.proxies.FileDocument
 	 * @return String GUID from this object, format: ID_0000000000
 	 * @deprecated Use getMendixObject().getId().toLong() to get a unique identifier for this object.
 	 */
-	@Override
-	@Deprecated
+	@java.lang.Override
+	@java.lang.Deprecated
 	public java.lang.String getGUID()
 	{
 		return "ID_" + getMendixObject().getId().toLong();
