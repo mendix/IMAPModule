@@ -175,13 +175,21 @@ public class Microflows
 			throw new MendixRuntimeException(e);
 		}
 	}
-	public static void iVK_ReceiveEmails(IContext context, imap_pop3_email.proxies.EmailAccount _emailAccount)
+	public static java.util.List<imap_pop3_email.proxies.EmailMessage> iVK_ReceiveEmails(IContext context, imap_pop3_email.proxies.EmailAccount _emailAccount)
 	{
 		try
 		{
 			Map<java.lang.String, Object> params = new HashMap<java.lang.String, Object>();
 			params.put("EmailAccount", _emailAccount == null ? null : _emailAccount.getMendixObject());
-			Core.execute(context, "IMAP_POP3_email.IVK_ReceiveEmails", params);
+			java.util.List<IMendixObject> objs = Core.execute(context, "IMAP_POP3_email.IVK_ReceiveEmails", params);
+			java.util.List<imap_pop3_email.proxies.EmailMessage> result = null;
+			if (objs != null)
+			{
+				result = new java.util.ArrayList<imap_pop3_email.proxies.EmailMessage>();
+				for (IMendixObject obj : objs)
+					result.add(imap_pop3_email.proxies.EmailMessage.initialize(context, obj));
+			}
+			return result;
 		}
 		catch (CoreException e)
 		{

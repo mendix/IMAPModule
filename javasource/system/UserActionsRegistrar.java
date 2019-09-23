@@ -17,7 +17,6 @@ public class UserActionsRegistrar
     registrator.registerUserAction(imap_pop3_email.actions.GetFolders.class);
     registrator.registerUserAction(imap_pop3_email.actions.RetrieveEmailMessages.class);
     registrator.registerUserAction(imap_pop3_tests.actions.SendEmail.class);
-    registrator.registerUserAction(imap_pop3_tests.actions.Wait.class);
     registrator.registerUserAction(objecthandling.actions.clone.class);
     registrator.registerUserAction(objecthandling.actions.commitInSeparateDatabaseTransaction.class);
     registrator.registerUserAction(objecthandling.actions.copyAttributes.class);
