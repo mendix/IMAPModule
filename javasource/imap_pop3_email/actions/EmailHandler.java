@@ -27,7 +27,7 @@ public class EmailHandler {
   private final EmailAccount account;
   private final IContext context;
 
-  public EmailHandler(EmailAccount account, IContext context) throws MessagingException, CoreException {
+  EmailHandler(EmailAccount account, IContext context) throws MessagingException, CoreException {
     if (account.getServerProtocol() != null) {
       this.account = account;
       this.context = context;
@@ -88,15 +88,14 @@ public class EmailHandler {
     return store.isConnected();
   }
 
-  public void closeConnection() throws MessagingException {
+  void closeConnection() throws MessagingException {
     store.close();
   }
 
-  public boolean customFolderExists() throws MessagingException {
+  private boolean customFolderExists() throws MessagingException {
     this.folder = store.getFolder(this.account.getFolder());
 
     return folder.exists();
-
   }
 
 
@@ -104,11 +103,9 @@ public class EmailHandler {
    * - Open the folder to read the emails from. - Process the emails with the
    * attachments - Execute post handling (Delete or remove emails)
    *
-   * @return
-   * @throws Exception
+   * @return A list of Email Messages
    */
-  public List<IMendixObject> readEmailMessages() throws Exception {
-
+  List<IMendixObject> readEmailMessages() throws MessagingException, CoreException {
     if (!this.customFolderExists()) {
       throw new FolderNotFoundException(folder);
     }
@@ -120,7 +117,7 @@ public class EmailHandler {
       case MoveMessage:
         log.debug("Open source folder: " + this.account.getFolder() + " with READ/WRITE rights to move/delete emails.");
         folder.open(Folder.READ_WRITE);
-        moveList = new ArrayList<Message>();
+        moveList = new ArrayList<>();
         break;
       default:
         log.debug("Open source folder: " + this.account.getFolder() + " with READ rights to pick up emails.");
@@ -131,7 +128,7 @@ public class EmailHandler {
     // Store the retrieved message in a certain cases
     int amountEmails = folder.getMessageCount();
     int offset = 1;
-    int nrToFetch = 0;
+    int nrToFetch;
     if (this.account.getUseBatchImport() && amountEmails > this.account.getBatchSize()) {
       log.debug("There are more emails on the server than the used batch size. The amount that is too much will be imported with the next round. Orginal amount: "
               + amountEmails
@@ -144,8 +141,8 @@ public class EmailHandler {
       amountEmails = this.account.getBatchSize();
     }
 
-    List<IMendixObject> outputList = new ArrayList<IMendixObject>();
-    List<IMendixObject> commitList = new ArrayList<IMendixObject>();
+    List<IMendixObject> outputList = new ArrayList<>();
+    List<IMendixObject> commitList = new ArrayList<>();
     // Read the mesages from the server
     log.debug("START - Processing a list of incoming emails with a size: " + amountEmails);
     //MimeMessage[] messages = (MimeMessage[]) folder.search(new FlagTerm(new Flags(Flags.Flag.USER), false));
@@ -244,10 +241,10 @@ public class EmailHandler {
                 }
                 log.debug("START - Moving " + messageList.length + " emails to folder: " + this.account.getMoveFolder() + " with the source folder: " + this.account.getFolder());
 
-                if (folder != null && messageList != null && moveFolder != null) {
+                if (folder != null) {
                   folder.copyMessages(messageList, moveFolder);
                 } else {
-                  String text = (folder != null ? "" : " source folder is empty ") + (messageList != null ? "" : " list of emails is empty ") + (moveFolder != null ? "" : " move folder is empty ");
+                  String text = " source folder is empty " + "" + "";
                   throw new CoreException("Failed to move emails to folder: " + this.account.getMoveFolder() + ", because " + text);
                 }
               }
@@ -269,12 +266,12 @@ public class EmailHandler {
 
 
       if (moveList != null) moveList.clear();
-      if (outputList != null) outputList.clear();
-      if (commitList != null) commitList.clear();
+      outputList.clear();
+      commitList.clear();
     }
 
     if (this.account.getHandling() == imap_pop3_email.proxies.MessageHandling.MoveMessage) {
-      if (moveFolder.isOpen()) {
+      if (moveFolder != null && moveFolder.isOpen()) {
         moveFolder.close(true);
       }
     }
@@ -292,12 +289,10 @@ public class EmailHandler {
    *
    * @param email     The email from the IMAP mail server
    * @param mxMessage The Mendix object to save the email content
-   * @throws MessagingException Exceptoin
-   * @throws IOException        Exceptoin
    */
   private void processEmailContent(Message email, EmailMessage mxMessage) throws MessagingException, IOException {
     log.trace("Process email, content type: " + email.getContentType() + " - " + email.getSubject());
-    List<IMendixObject> attachmentList = new ArrayList<IMendixObject>();
+    List<IMendixObject> attachmentList = new ArrayList<>();
     boolean hasHTML = false;
     if (email.isMimeType("text/plain") || email.isMimeType("text/html")) {
       // The email plain, plain, flat plain
@@ -367,7 +362,7 @@ public class EmailHandler {
       } else if (bodyPart.isMimeType("text/html") && bodyPart.getFileName() == null) {
         setEmailContent(mxMessage, bodyPart.getContent(), bodyPart.getContentType());
         hasHTML = true;
-      } else if (bodyPart.isMimeType("text/plain") && hasHTML == false) {
+      } else if (bodyPart.isMimeType("text/plain") && !hasHTML) {
         setEmailContent(mxMessage, bodyPart.getContent(), bodyPart.getContentType());
         hasHTML = true;
       } else {
@@ -376,7 +371,7 @@ public class EmailHandler {
         // The content is an attachment
         Attachment attach = new Attachment(this.context);
         attach.setAttachment_EmailMessage(mxMessage);
-        attach.setSize(Long.valueOf(bodyPart.getSize()));
+        attach.setSize((long) bodyPart.getSize());
         attach.setName(bodyPart.getFileName());
         Core.storeFileDocumentContent(this.context, attach.getMendixObject(), bodyPart.getInputStream());
 
@@ -401,9 +396,8 @@ public class EmailHandler {
    *
    * @param message The Mendix object to save the email content
    * @param content Object of the content, can be an InputStream or String
-   * @throws IOException
    */
-  private static void setEmailContent(EmailMessage message, Object content, String contentType) throws IOException {
+  private static void setEmailContent(EmailMessage message, Object content, String contentType) {
     if (content instanceof InputStream) {
       message.setContent(mkString((InputStream) content, getCharSet(contentType)));
     } else if (content instanceof String) {
@@ -422,13 +416,13 @@ public class EmailHandler {
   private static String getCharSet(String contentType) {
     String charSet = "UTF-8";
     try {
-      if (contentType.indexOf("UTF-8") > -1) {
+      if (contentType.contains("UTF-8")) {
         charSet = "UTF-8";
-      } else if (contentType.indexOf("ISO-8859-1") > -1) {
+      } else if (contentType.contains("ISO-8859-1")) {
         charSet = "ISO-8859-1";
-      } else if (contentType.indexOf("charset") > -1) {
+      } else if (contentType.contains("charset")) {
         for (String set : Charset.availableCharsets().keySet()) {
-          if (contentType.indexOf(set) > -1) {
+          if (contentType.contains(set)) {
             charSet = set;
             break;
           }
@@ -438,24 +432,25 @@ public class EmailHandler {
       charSet = "UTF-8";
       log.warn("Failed to determine the charset from the email part: " + contentType, ex);
     }
+
     return charSet;
   }
 
   /**
    * Creates a sum of a list of EmailAddresses with a comma separated
    *
-   * @param addresslist
+   * @param addresses list of email address
    * @return A combined string of all EmailAddresses
-   * @throws UnsupportedEncodingException
+   * @throws UnsupportedEncodingException The Character Encoding is not supported.
    */
-  private static String getEmailAddressList(Address[] addresslist) throws UnsupportedEncodingException {
+  private static String getEmailAddressList(Address[] addresses) throws UnsupportedEncodingException {
     String output = "";
-    if (addresslist != null) {
-      for (int i = 0; i < addresslist.length; i++) {
-        String address = addresslist[i].toString();
+    if (addresses != null) {
+      for (int i = 0; i < addresses.length; i++) {
+        String address = addresses[i].toString();
         if (output.length() + address.length() + 2 < 200) {
-          output += MimeUtility.decodeText((addresslist[i].toString()));
-          if (i < (addresslist.length - 1)) {
+          output += MimeUtility.decodeText((addresses[i].toString()));
+          if (i < (addresses.length - 1)) {
             output += ", ";
           }
         } else {
