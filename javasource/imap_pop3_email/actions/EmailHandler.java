@@ -20,68 +20,69 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Scanner;
 
+import static imap_pop3_email.proxies.MessageHandling.DeleteMessage;
+import static imap_pop3_email.proxies.MessageHandling.MoveMessage;
+
 public class EmailHandler {
   protected static ILogNode log = Core.getLogger("Email_IMAPPOP3");
   private final Store store;
-  private Folder folder = null;
   private final EmailAccount account;
   private final IContext context;
 
   EmailHandler(EmailAccount account, IContext context) throws MessagingException, CoreException {
-    if (account.getServerProtocol() != null) {
-      this.account = account;
-      this.context = context;
-      // Initialize session to server.
-      Properties props = new Properties();
-      props.put("mail.user", account.getUsername());
-
-      switch (account.getServerProtocol()) {
-        case IMAPS:
-          props.put("mail.store.protocol", "imaps");
-          props.put("mail.imaps.host", account.getServerHost());
-          props.put("mail.imaps.port", account.getServerPort());
-          props.put("mail.imaps.connectionpoolsize", 20);
-          props.put("mail.imaps.partialfetch", false);
-          if (account.getTimeout() > 0) {
-            props.put("mail.imaps.timeout", account.getTimeout());
-          }
-
-          break;
-        case IMAP:
-          props.put("mail.store.protocol", "imap");
-          props.put("mail.imap.host", account.getServerHost());
-          props.put("mail.imap.port", account.getServerPort());
-          props.put("mail.imap.connectionpoolsize", 20);
-          props.put("mail.imap.partialfetch", false);
-          if (account.getTimeout() > 0) {
-            props.put("mail.imap.timeout", account.getTimeout());
-          }
-          break;
-        case POP3S:
-          props.put("mail.store.protocol", "pop3s");
-          props.put("mail.pop3s.host", account.getServerHost());
-          props.put("mail.pop3s.port", account.getServerPort());
-          if (account.getTimeout() > 0) {
-            props.put("mail.pop3s.timeout", account.getTimeout());
-          }
-
-          break;
-        case POP3:
-          props.put("mail.store.protocol", "pop3");
-          props.put("mail.pop3.host", account.getServerHost());
-          props.put("mail.pop3.port", account.getServerPort());
-          if (account.getTimeout() > 0) {
-            props.put("mail.pop3.timeout", account.getTimeout());
-          }
-          break;
-      }
-
-      Session session = Session.getInstance(props, null);
-      store = session.getStore();
-      store.connect(account.getUsername(), account.getPassword());
-    } else {
+    if (account.getServerProtocol() == null)
       throw new CoreException("Server protocol is not specified.");
+
+    this.account = account;
+    this.context = context;
+    // Initialize session to server.
+    Properties props = new Properties();
+    props.put("mail.user", account.getUsername());
+
+    switch (account.getServerProtocol()) {
+      case IMAPS:
+        props.put("mail.store.protocol", "imaps");
+        props.put("mail.imaps.host", account.getServerHost());
+        props.put("mail.imaps.port", account.getServerPort());
+        props.put("mail.imaps.connectionpoolsize", 20);
+        props.put("mail.imaps.partialfetch", false);
+        if (account.getTimeout() > 0) {
+          props.put("mail.imaps.timeout", account.getTimeout());
+        }
+
+        break;
+      case IMAP:
+        props.put("mail.store.protocol", "imap");
+        props.put("mail.imap.host", account.getServerHost());
+        props.put("mail.imap.port", account.getServerPort());
+        props.put("mail.imap.connectionpoolsize", 20);
+        props.put("mail.imap.partialfetch", false);
+        if (account.getTimeout() > 0) {
+          props.put("mail.imap.timeout", account.getTimeout());
+        }
+        break;
+      case POP3S:
+        props.put("mail.store.protocol", "pop3s");
+        props.put("mail.pop3s.host", account.getServerHost());
+        props.put("mail.pop3s.port", account.getServerPort());
+        if (account.getTimeout() > 0) {
+          props.put("mail.pop3s.timeout", account.getTimeout());
+        }
+
+        break;
+      case POP3:
+        props.put("mail.store.protocol", "pop3");
+        props.put("mail.pop3.host", account.getServerHost());
+        props.put("mail.pop3.port", account.getServerPort());
+        if (account.getTimeout() > 0) {
+          props.put("mail.pop3.timeout", account.getTimeout());
+        }
+        break;
     }
+
+    Session session = Session.getInstance(props, null);
+    store = session.getStore();
+    store.connect(account.getUsername(), account.getPassword());
   }
 
   public boolean isConnected() {
@@ -92,12 +93,106 @@ public class EmailHandler {
     store.close();
   }
 
-  private boolean customFolderExists() throws MessagingException {
-    this.folder = store.getFolder(this.account.getFolder());
-
-    return folder.exists();
+  public Folder[] getFolders() throws MessagingException {
+    return store.getDefaultFolder().list();
   }
 
+  private Folder getFolder() throws MessagingException {
+    Folder folder = store.getFolder(account.getFolder());
+    if (!folder.exists())
+      throw new FolderNotFoundException(folder);
+
+    return folder;
+  }
+
+  private void openFolder(Folder folder) throws MessagingException {
+    switch (account.getHandling()) {
+      case DeleteMessage:
+      case MoveMessage:
+        log.debug("Open source folder: " + this.account.getFolder() + " with READ/WRITE rights to move/delete emails.");
+        folder.open(Folder.READ_WRITE);
+        break;
+      default:
+        log.debug("Open source folder: " + this.account.getFolder() + " with READ rights to pick up emails.");
+        folder.open(Folder.READ_ONLY);
+        break;
+    }
+  }
+
+  private int emailAmounts(Folder folder) throws MessagingException {
+    int messageCount = folder.getMessageCount();
+    if (account.getUseBatchImport() && messageCount > account.getBatchSize()) {
+      log.debug("There are more emails on the server than the used batch size. " +
+              "The amount that is too much will be imported with the next round. " +
+              "Original amount: " + messageCount + " New amount: " + account.getBatchSize());
+    }
+
+    if (!account.getUseBatchImport() && messageCount > account.getBatchSize()) {
+      return account.getBatchSize();
+    }
+
+    return messageCount;
+  }
+
+  private Folder getMoveFolder() throws MessagingException, CoreException {
+    if (account.getHandling() != MoveMessage)
+      return null;
+
+    Folder moveFolder = store.getFolder(account.getMoveFolder());
+    if (!moveFolder.exists()) {
+      log.debug("Create the target folder: " + account.getMoveFolder() + ", because it doesn't exist.");
+      if (!moveFolder.create(Folder.HOLDS_MESSAGES)) {
+        throw new CoreException("Failed to create the target folder: " + account.getMoveFolder());
+      }
+    }
+
+    return moveFolder;
+  }
+
+  private void fetchMessages(Folder folder, int offset, int numberToFetch) throws MessagingException {
+    Message[] messages = folder.getMessages(offset, offset + numberToFetch - 1);
+
+    if (account.getServerProtocol() == Protocol.IMAP || account.getServerProtocol() == Protocol.IMAPS) {
+      FetchProfile profile = new FetchProfile();
+      profile.add(FetchProfile.Item.ENVELOPE);
+      profile.add(FetchProfile.Item.CONTENT_INFO);
+      folder.fetch(messages, profile);
+    }
+  }
+
+  private EmailMessage toEmailMessage(Message email) throws MessagingException, UnsupportedEncodingException {
+    EmailMessage message = new EmailMessage(context);
+    message.setSize(email.getSize());
+    message.setFrom(toCommaSeparated(email.getFrom()));
+    message.setTo(toCommaSeparated(email.getRecipients(Message.RecipientType.TO)));
+    message.setCC(toCommaSeparated(email.getRecipients(Message.RecipientType.CC)));
+    message.setBCC(toCommaSeparated(email.getRecipients(Message.RecipientType.BCC)));
+    message.setSenddate(email.getSentDate());
+    message.setSubject(email.getSubject() != null ? MimeUtility.decodeText(email.getSubject()) : "");
+
+    return message;
+  }
+
+  private void moveMessages(List<Message> messages, Folder source, Folder target) throws MessagingException {
+    if (!target.isOpen()) {
+      log.debug("Open the target folder: " + target.getFullName() + ", because it's closed.");
+      target.open(Folder.READ_WRITE);
+    }
+
+    log.debug("START - Moving " + messages.size() + " emails to folder: " + target.getFullName() +
+            " with the source folder: " + source.getFullName());
+    source.copyMessages(messages.toArray(new Message[0]), target);
+
+    target.close(true);
+  }
+
+  private void deleteMessages(List<Message> messages) throws MessagingException {
+    log.debug("START - Deleting " + messages.size() + " emails from folder: " + account.getFolder());
+    for (Message message : messages) {
+      log.debug("START - Deleting " + message.getSubject());
+      message.setFlag(Flags.Flag.DELETED, true);
+    }
+  }
 
   /**
    * - Open the folder to read the emails from. - Process the emails with the
@@ -106,179 +201,82 @@ public class EmailHandler {
    * @return A list of Email Messages
    */
   List<IMendixObject> readEmailMessages() throws MessagingException, CoreException {
-    if (!this.customFolderExists()) {
-      throw new FolderNotFoundException(folder);
-    }
-
     // Open the emailbox with the needed rights
-    List<Message> moveList = null;
-    switch (this.account.getHandling()) {
-      case DeleteMessage:
-      case MoveMessage:
-        log.debug("Open source folder: " + this.account.getFolder() + " with READ/WRITE rights to move/delete emails.");
-        folder.open(Folder.READ_WRITE);
-        moveList = new ArrayList<>();
-        break;
-      default:
-        log.debug("Open source folder: " + this.account.getFolder() + " with READ rights to pick up emails.");
-        folder.open(Folder.READ_ONLY);
-        break;
-    }
+    Folder folder = getFolder();
+    openFolder(folder);
 
-    // Store the retrieved message in a certain cases
-    int amountEmails = folder.getMessageCount();
-    int offset = 1;
-    int nrToFetch;
-    if (this.account.getUseBatchImport() && amountEmails > this.account.getBatchSize()) {
-      log.debug("There are more emails on the server than the used batch size. The amount that is too much will be imported with the next round. Orginal amount: "
-              + amountEmails
-              + " New amount: "
-              + this.account.getBatchSize());
-
-    }
-
-    if (!this.account.getUseBatchImport() && folder.getMessageCount() > this.account.getBatchSize()) {
-      amountEmails = this.account.getBatchSize();
-    }
-
-    List<IMendixObject> outputList = new ArrayList<>();
+    int amountEmails = emailAmounts(folder);
+    List<Message> moveList = new ArrayList<>();
     List<IMendixObject> commitList = new ArrayList<>();
-    // Read the mesages from the server
+    List<IMendixObject> outputList = new ArrayList<>();
+    Folder moveFolder = getMoveFolder();
+
     log.debug("START - Processing a list of incoming emails with a size: " + amountEmails);
-    //MimeMessage[] messages = (MimeMessage[]) folder.search(new FlagTerm(new Flags(Flags.Flag.USER), false));
 
-    Message[] messages;
-
-    Folder moveFolder = null;
-
-    if (this.account.getHandling() == imap_pop3_email.proxies.MessageHandling.MoveMessage) {
-      moveFolder = store.getFolder(this.account.getMoveFolder());
-      if (!moveFolder.exists()) {
-        log.debug("Create the target folder: " + this.account.getMoveFolder() + ", because it doesn't exist.");
-        if (!moveFolder.create(Folder.HOLDS_MESSAGES)) {
-          throw new CoreException("Failed to create the target folder: " + this.account.getMoveFolder());
-        }
-      }
-    }
-
+    int offset = 1;
     while (amountEmails > 0) {
+      int nrToFetch = amountEmails < account.getBatchSize() ? amountEmails : account.getBatchSize();
+      fetchMessages(folder, offset, nrToFetch);
 
-      nrToFetch = amountEmails < this.account.getBatchSize() ? amountEmails : this.account.getBatchSize();
-      messages = folder.getMessages(offset, offset + nrToFetch - 1);
-
-      if (account.getServerProtocol() == Protocol.IMAP || account.getServerProtocol() == Protocol.IMAPS) {
-        FetchProfile profile = new FetchProfile();
-        profile.add(FetchProfile.Item.ENVELOPE);
-        profile.add(FetchProfile.Item.CONTENT_INFO);
-        folder.fetch(messages, profile);
-      }
-
-      for (int i = 0; i < nrToFetch; i++) {
-        amountEmails--;
-
+      for (int i = 0; i < nrToFetch; i++, amountEmails--) {
         Message email = null;
         try {
-          email = folder.getMessage(offset);
-          offset++;
-          EmailMessage message = new EmailMessage(this.context);
-          message.setSize(email.getSize());
-          // Save all relevant emailaddresses
-          message.setFrom(getEmailAddressList(email.getFrom()));
-          message.setTo(getEmailAddressList(email.getRecipients(Message.RecipientType.TO)));
-          message.setCC(getEmailAddressList(email.getRecipients(Message.RecipientType.CC)));
-          message.setBCC(getEmailAddressList(email.getRecipients(Message.RecipientType.BCC)));
-          // Set the senddate from the email
-          message.setSenddate(email.getSentDate());
-          // Set the subject from the email
-          message.setSubject(email.getSubject() != null ? MimeUtility.decodeText(email.getSubject()) : "");
+          email = folder.getMessage(offset++);
+          EmailMessage message = toEmailMessage(email);
 
           log.debug("Process message nr: " + i + " with subject: " + email.getSubject());
-
-          // PROCESS CONTENT AND ATTACHMENTS
           processEmailContent(email, message);
 
-          // Add the message to the commitlist
-          outputList.add(message.getMendixObject());
-          commitList.add(message.getMendixObject());
-
-          if (moveList != null) {
+          if (account.getHandling() == DeleteMessage || account.getHandling() == MoveMessage)
             moveList.add(email);
-          }
+          commitList.add(message.getMendixObject());
+          outputList.add(message.getMendixObject());
         } catch (Exception ex) {
           String subject = email != null ? email.getSubject() : "Unknown";
-          log.error("Error has occured while processing incoming email: "
+          log.error("Error has occurred while processing incoming email: "
                   + subject + ". The email will be hold in the "
-                  + this.account.getFolder()
+                  + account.getFolder()
                   + " folder and will processed with the next import.", ex);
         }
 
         // Commit emails in a batch size of 300
         if (commitList.size() > 300) {
-          Core.commit(this.context, commitList);
+          Core.commit(context, commitList);
           commitList.clear();
         }
       }
-      // Commit the retrieved messages
-      Core.commit(this.context, outputList);
+
+      // Commit the remainder messages
+      Core.commit(context, commitList);
       commitList.clear();
 
       try {
-        if (moveList != null && moveList.size() > 0) {
+        if (moveList.size() > 0) {
           // Check if any post email processing actions are required.
-          switch (this.account.getHandling()) {
+          switch (account.getHandling()) {
             case MoveMessage:
-              // Open the folder to move the retrieved messages to. If not
-              // exist: create
-              if (moveFolder != null) {
-                if (!moveFolder.isOpen()) {
-                  log.debug("Open the target folder: " + this.account.getMoveFolder() + ", because it's closed.");
-                  moveFolder.open(Folder.READ_WRITE);
-                }
-                // Parse ArrayList to Message Array
-                Message[] messageList = new Message[moveList.size()];
-                for (int i = 0; i < messageList.length; i++) {
-                  messageList[i] = moveList.get(i);
-                }
-                log.debug("START - Moving " + messageList.length + " emails to folder: " + this.account.getMoveFolder() + " with the source folder: " + this.account.getFolder());
-
-                if (folder != null) {
-                  folder.copyMessages(messageList, moveFolder);
-                } else {
-                  String text = " source folder is empty " + "" + "";
-                  throw new CoreException("Failed to move emails to folder: " + this.account.getMoveFolder() + ", because " + text);
-                }
-              }
-
+              if (moveFolder != null)
+                moveMessages(moveList, folder, moveFolder);
+              break;
             case DeleteMessage:
-              log.debug("START - Deleting " + moveList.size() + " emails from folder: " + this.account.getFolder());
-              for (Message email : moveList) {
-                log.debug("START - Deleting " + email.getSubject());
-                email.setFlag(Flags.Flag.DELETED, true);
-              }
+              deleteMessages(moveList);
               break;
             case NoHandling:
               break;
           }
         }
       } catch (Exception ex) {
-        log.error("Failed processing the post handling " + this.account.getHandling().toString(), ex);
+        log.error("Failed processing the post handling " + account.getHandling().toString(), ex);
       }
 
-
-      if (moveList != null) moveList.clear();
-      outputList.clear();
+      moveList.clear();
       commitList.clear();
     }
 
-    if (this.account.getHandling() == imap_pop3_email.proxies.MessageHandling.MoveMessage) {
-      if (moveFolder != null && moveFolder.isOpen()) {
-        moveFolder.close(true);
-      }
-    }
-    // Close the connections
     folder.close(true);
     store.close();
-    log.debug("END - Finished Processing a list of " + amountEmails + "incoming emails");
+
+    log.debug("END - Finished Processing a list of " + amountEmails + " incoming emails");
 
     return outputList;
   }
@@ -391,12 +389,6 @@ public class EmailHandler {
     return hasHTML;
   }
 
-  /**
-   * Parse the email content to string to save to the Mendix object. It convert the content from an InputStream to String.
-   *
-   * @param message The Mendix object to save the email content
-   * @param content Object of the content, can be an InputStream or String
-   */
   private static void setEmailContent(EmailMessage message, Object content, String contentType) {
     if (content instanceof InputStream) {
       message.setContent(mkString((InputStream) content, getCharSet(contentType)));
@@ -436,14 +428,7 @@ public class EmailHandler {
     return charSet;
   }
 
-  /**
-   * Creates a sum of a list of EmailAddresses with a comma separated
-   *
-   * @param addresses list of email address
-   * @return A combined string of all EmailAddresses
-   * @throws UnsupportedEncodingException The Character Encoding is not supported.
-   */
-  private static String getEmailAddressList(Address[] addresses) throws UnsupportedEncodingException {
+  private static String toCommaSeparated(Address[] addresses) throws UnsupportedEncodingException {
     String output = "";
     if (addresses != null) {
       for (int i = 0; i < addresses.length; i++) {
@@ -460,9 +445,5 @@ public class EmailHandler {
     }
 
     return output;
-  }
-
-  public Folder[] getFolders() throws MessagingException {
-    return store.getDefaultFolder().list();
   }
 }
