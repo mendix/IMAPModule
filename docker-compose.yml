@@ -1,0 +1,15 @@
+version: '2.0'
+
+services:
+  greenmail:
+    image: 'greenmail/standalone:1.5.10'
+    restart: always
+    environment:
+      - GREENMAIL_OPTS=-Dgreenmail.setup.test.all -Dgreenmail.hostname=0.0.0.0 -Dgreenmail.users=bob:bob@localhost -Dgreenmail.verbose
+    ports:
+      - 25:3025
+      - 110:3110
+      - 143:3143
+      - 465:3465
+      - 993:3993
+      - 995:3995
