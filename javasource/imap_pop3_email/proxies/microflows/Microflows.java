@@ -222,19 +222,6 @@ public class Microflows
 			throw new MendixRuntimeException(e);
 		}
 	}
-	public static void oCh_Emailconfiguration(IContext context, imap_pop3_email.proxies.EmailAccount _emailSettings)
-	{
-		try
-		{
-			Map<java.lang.String, Object> params = new HashMap<java.lang.String, Object>();
-			params.put("EmailSettings", _emailSettings == null ? null : _emailSettings.getMendixObject());
-			Core.execute(context, "IMAP_POP3_email.OCh_Emailconfiguration", params);
-		}
-		catch (CoreException e)
-		{
-			throw new MendixRuntimeException(e);
-		}
-	}
 	public static void oCh_EmailProtocol(IContext context, imap_pop3_email.proxies.EmailAccount _emailSettings)
 	{
 		try
