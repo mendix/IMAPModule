@@ -15,17 +15,43 @@ import com.mendix.systemwideinterfaces.core.IMendixObject;
 public class Microflows
 {
 	// These are the microflows for the IMAP_POP3_Tests module
-	public static imap_pop3_email.proxies.EmailAccount create_Account(IContext context, imap_pop3_email.proxies.Protocol _protocol, boolean _useInlineImages, imap_pop3_email.proxies.MessageHandling _messageHandling, java.lang.Long _batchSize)
+	public static imap_pop3_email.proxies.EmailAccount createAccount(IContext context, imap_pop3_email.proxies.Protocol _protocol, boolean _useInlineImages, imap_pop3_email.proxies.MessageHandling _messageHandling, java.lang.Long _batchSize, java.lang.String _folderName)
 	{
 		try
 		{
 			Map<java.lang.String, Object> params = new HashMap<java.lang.String, Object>();
-			params.put("Protocol", _protocol == null ? null : _protocol.name());
-			params.put("UseInlineImages", _useInlineImages);
-			params.put("MessageHandling", _messageHandling == null ? null : _messageHandling.name());
-			params.put("BatchSize", _batchSize);
-			IMendixObject result = (IMendixObject)Core.execute(context, "IMAP_POP3_Tests.Create_Account", params);
+			params.put("protocol", _protocol == null ? null : _protocol.name());
+			params.put("useInlineImages", _useInlineImages);
+			params.put("messageHandling", _messageHandling == null ? null : _messageHandling.name());
+			params.put("batchSize", _batchSize);
+			params.put("folderName", _folderName);
+			IMendixObject result = (IMendixObject)Core.execute(context, "IMAP_POP3_Tests.CreateAccount", params);
 			return result == null ? null : imap_pop3_email.proxies.EmailAccount.initialize(context, result);
+		}
+		catch (CoreException e)
+		{
+			throw new MendixRuntimeException(e);
+		}
+	}
+	public static void deleteFolder(IContext context, java.lang.String _folderName)
+	{
+		try
+		{
+			Map<java.lang.String, Object> params = new HashMap<java.lang.String, Object>();
+			params.put("folderName", _folderName);
+			Core.execute(context, "IMAP_POP3_Tests.DeleteFolder", params);
+		}
+		catch (CoreException e)
+		{
+			throw new MendixRuntimeException(e);
+		}
+	}
+	public static void resetData(IContext context)
+	{
+		try
+		{
+			Map<java.lang.String, Object> params = new HashMap<java.lang.String, Object>();
+			Core.execute(context, "IMAP_POP3_Tests.ResetData", params);
 		}
 		catch (CoreException e)
 		{
@@ -131,12 +157,60 @@ public class Microflows
 			throw new MendixRuntimeException(e);
 		}
 	}
-	public static java.lang.String test_Retrieve_Without_Delete(IContext context)
+	public static java.lang.String test_Retrieve_Then_Delete(IContext context)
 	{
 		try
 		{
 			Map<java.lang.String, Object> params = new HashMap<java.lang.String, Object>();
-			return (java.lang.String)Core.execute(context, "IMAP_POP3_Tests.Test_Retrieve_Without_Delete", params);
+			return (java.lang.String)Core.execute(context, "IMAP_POP3_Tests.Test_Retrieve_Then_Delete", params);
+		}
+		catch (CoreException e)
+		{
+			throw new MendixRuntimeException(e);
+		}
+	}
+	public static java.lang.String test_Retrieve_Then_Move(IContext context)
+	{
+		try
+		{
+			Map<java.lang.String, Object> params = new HashMap<java.lang.String, Object>();
+			return (java.lang.String)Core.execute(context, "IMAP_POP3_Tests.Test_Retrieve_Then_Move", params);
+		}
+		catch (CoreException e)
+		{
+			throw new MendixRuntimeException(e);
+		}
+	}
+	public static java.lang.String test_Retrieve_Then_Move_Then_Delete(IContext context)
+	{
+		try
+		{
+			Map<java.lang.String, Object> params = new HashMap<java.lang.String, Object>();
+			return (java.lang.String)Core.execute(context, "IMAP_POP3_Tests.Test_Retrieve_Then_Move_Then_Delete", params);
+		}
+		catch (CoreException e)
+		{
+			throw new MendixRuntimeException(e);
+		}
+	}
+	public static java.lang.String test_Retrieve_Then_Nothing(IContext context)
+	{
+		try
+		{
+			Map<java.lang.String, Object> params = new HashMap<java.lang.String, Object>();
+			return (java.lang.String)Core.execute(context, "IMAP_POP3_Tests.Test_Retrieve_Then_Nothing", params);
+		}
+		catch (CoreException e)
+		{
+			throw new MendixRuntimeException(e);
+		}
+	}
+	public static java.lang.String test_Retrieve_Then_Nothing_Then_Delete(IContext context)
+	{
+		try
+		{
+			Map<java.lang.String, Object> params = new HashMap<java.lang.String, Object>();
+			return (java.lang.String)Core.execute(context, "IMAP_POP3_Tests.Test_Retrieve_Then_Nothing_Then_Delete", params);
 		}
 		catch (CoreException e)
 		{
