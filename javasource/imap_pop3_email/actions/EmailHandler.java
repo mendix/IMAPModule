@@ -173,7 +173,7 @@ public class EmailHandler {
     return message;
   }
 
-  private void moveMessages(List<Message> messages, Folder source, Folder target) throws MessagingException {
+  private void copyMessages(List<Message> messages, Folder source, Folder target) throws MessagingException {
     if (!target.isOpen()) {
       log.debug("Open the target folder: " + target.getFullName() + ", because it's closed.");
       target.open(Folder.READ_WRITE);
@@ -192,6 +192,11 @@ public class EmailHandler {
       log.debug("START - Deleting " + message.getSubject());
       message.setFlag(Flags.Flag.DELETED, true);
     }
+  }
+
+  private void moveMessages(List<Message> messages, Folder source, Folder target) throws MessagingException {
+    copyMessages(messages, source, target);
+    deleteMessages(messages);
   }
 
   /**

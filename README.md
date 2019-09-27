@@ -21,10 +21,7 @@ Retrieve emails and act like an email client. This is the recommended approach w
 
 ## Installation
 This module depends on the following modules:
-*Encryption (used to encrypt passwords of the email accounts)
+* Encryption v2.0.0 (used to encrypt passwords of the email accounts)
 
 ## Configuration
 Basic setup and receive of emails can be done using the EmailAccount_Overview. To invoke receiving emails from an account you can call DS_ReceiveEmails.
-
-## Dependencies
-This version requires Encryption v2.0.0.
