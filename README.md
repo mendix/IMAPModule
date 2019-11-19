@@ -10,11 +10,11 @@ Retrieve emails and act like an email client. This is the recommended approach w
 ## Features
 * Configuration of multiple accounts.
 * Supported protocols:
-* * POP3 / POP3S
-* * IMAP / IMAPS
+  * POP3 / POP3S
+  * IMAP / IMAPS
 * Actions to be performed after receiving emails:
-* * Deleted from server
-* * Move to a folder (e.g. archive).
+  * Deleted from server
+  * Move to a folder (e.g. archive).
 
 ## Limitations
 * Does not retrieve meeting requests (.ics).
