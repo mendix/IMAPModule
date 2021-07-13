@@ -479,7 +479,7 @@ let introScreen = {
     buttonPaginationAbove: {
         container: {
             paddingVertical: spacing.regular,
-            backgroundColor: "red"
+            backgroundColor: button.primary.backgroundColor
         }
     }
 };
